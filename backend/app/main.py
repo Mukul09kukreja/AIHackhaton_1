@@ -6,11 +6,13 @@ from typing import Dict, Optional
 import json
 
 from fastapi import FastAPI, HTTPException
+import asyncio
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.services.organizer import FolderOrganizer
 from app.services.ai_service import generate_ai_suggestions
+from app.services.openai_service import generate_workspace_insights
 
 app = FastAPI(title="Smart File Organizer API", version="1.0.0")
 organizer = FolderOrganizer()
@@ -46,6 +48,8 @@ def scan_folder(payload: FolderRequest) -> Dict:
     suggestions, extra = organizer.heuristic_suggestions(data["files"])
     data["ai_suggestions"] = generate_ai_suggestions(data["files"], suggestions)
     data["insights"] = extra
+    ai_insights = asyncio.run(generate_workspace_insights(data["files"], payload.ai_assisted))
+    data["workspace_insights"] = ai_insights
     last_scan = data
     return data
 
@@ -99,4 +103,4 @@ def stats() -> Dict:
 def ai_suggestions() -> Dict:
     if not last_scan:
         raise HTTPException(status_code=400, detail="No scan data available")
-    return {"ai_suggestions": last_scan.get("ai_suggestions", []), "insights": last_scan.get("insights", {})}
+    return last_scan.get("workspace_insights", {"mode": "local", "summary": "Using local AI insights", "workspace_health_score": 0, "suggestions": [], "cleanup_recommendations": [], "risks": [], "category_insights": []})

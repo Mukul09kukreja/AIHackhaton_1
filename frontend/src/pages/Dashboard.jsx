@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FolderOpen, RotateCcw, WandSparkles, Database, HardDrive, Files, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { scanFolder, organizeFiles, undoOrganize } from '../services/api';
+import { scanFolder, organizeFiles, undoOrganize, getAISuggestions } from '../services/api';
 import StatsCard from '../components/StatsCard';
 import Loader from '../components/Loader';
 import SearchFilters from '../components/SearchFilters';
@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [category, setCategory] = useState('');
   const [duplicateOnly, setDuplicateOnly] = useState(false);
   const [activities, setActivities] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+  const [insights, setInsights] = useState(null);
 
   const logActivity = (type, summary) => {
     const next = [{ type, summary, timestamp: new Date().toISOString() }, ...activities].slice(0, 20);
@@ -42,6 +43,8 @@ export default function Dashboard() {
     try {
       const res = await scanFolder(folder, aiAssisted);
       setData(res.data);
+      const aiRes = await getAISuggestions();
+      setInsights(aiRes.data);
       const dupCount = res.data?.insights?.duplicate_count || 0;
       logActivity('scan', `Scanned ${res.data?.stats?.total_files || 0} files in ${folder}`);
       if (dupCount) logActivity('duplicate', `Detected ${dupCount} duplicate files`);
@@ -97,8 +100,23 @@ export default function Dashboard() {
           <button onClick={onUndo} disabled={loading || actionLoading} className="btn"><RotateCcw size={16} /> {actionLoading === 'undo' ? 'Undoing...' : 'Undo'}</button>
           <label className="ml-2 inline-flex items-center gap-2 text-sm text-slate-200">
             <input type="checkbox" checked={aiAssisted} onChange={(e) => setAiAssisted(e.target.checked)} />
-            AI Assisted {aiAssisted ? 'ON' : 'OFF'}
+            AI Assisted Insights {aiAssisted ? 'ON' : 'OFF'}
           </label>
+        </div>
+      </section>
+
+
+      <section className="rounded-3xl border border-cyan-300/20 bg-white/10 p-5 backdrop-blur-2xl">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-xl font-semibold text-white">AI Workspace Insights</h3>
+          <span className="rounded-full border border-white/20 px-3 py-1 text-xs text-cyan-200">{insights?.mode === 'openai' ? 'OpenAI enhanced' : 'Using local AI insights'}</span>
+        </div>
+        <p className="mt-2 text-slate-200">{insights?.summary || 'Run a scan to generate insights.'}</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl bg-white/10 p-3 text-white">Health Score: <span className="font-bold text-cyan-200">{insights?.workspace_health_score ?? '-'}</span></div>
+          {[...(insights?.suggestions || []), ...(insights?.cleanup_recommendations || []), ...(insights?.risks || []), ...(insights?.category_insights || [])].slice(0, 6).map((item, idx) => (
+            <motion.div key={idx} whileHover={{ y: -2 }} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-sm text-slate-100">{item}</motion.div>
+          ))}
         </div>
       </section>
 
