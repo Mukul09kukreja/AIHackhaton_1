@@ -9,8 +9,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from organizer import FolderOrganizer
-from ai_engine import generate_ai_suggestions
+from app.services.organizer import FolderOrganizer
+from app.services.ai_service import generate_ai_suggestions
 
 app = FastAPI(title="Smart File Organizer API", version="1.0.0")
 organizer = FolderOrganizer()
