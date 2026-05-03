@@ -116,16 +116,33 @@ class FolderOrganizer:
                 target = target_dir / f"{source.stem}_{counter}{source.suffix}"
                 counter += 1
             shutil.move(str(source), str(target))
-            history.append({"from": str(source), "to": str(target), "moved_at": datetime.now(timezone.utc).isoformat()})
+            history.append({
+                "from": str(source),
+                "to": str(target),
+                "src": str(source),
+                "dest": str(target),
+                "moved_at": datetime.now(timezone.utc).isoformat(),
+            })
         return history
 
-    def undo(self, moves: List[Dict]) -> int:
+    def undo(self, moves: List[Dict]) -> Dict:
         restored = 0
+        failed: List[Dict] = []
         for move in reversed(moves):
-            src = Path(move["to"])
-            dst = Path(move["from"])
-            if src.exists():
+            src = Path(move.get("dest") or move.get("to", ""))
+            dst = Path(move.get("src") or move.get("from", ""))
+            if not src.exists():
+                failed.append({"src": str(src), "dest": str(dst), "reason": "source_missing"})
+                continue
+            try:
                 dst.parent.mkdir(parents=True, exist_ok=True)
-                shutil.move(str(src), str(dst))
+                final_dst = dst
+                suffix_count = 1
+                while final_dst.exists():
+                    final_dst = dst.with_name(f"{dst.stem}_restored_{suffix_count}{dst.suffix}")
+                    suffix_count += 1
+                shutil.move(str(src), str(final_dst))
                 restored += 1
-        return restored
+            except Exception as exc:
+                failed.append({"src": str(src), "dest": str(dst), "reason": str(exc)})
+        return {"restored": restored, "failed": failed}

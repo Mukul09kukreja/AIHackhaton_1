@@ -51,15 +51,21 @@ def scan_folder(payload: FolderRequest) -> Dict:
 
 
 @app.post("/organize")
-def organize_files(payload: Optional[FolderRequest] = None) -> Dict:
+def organize_files(payload: Optional[FolderRequest] = None, dry_run: bool = False) -> Dict:
     if not last_scan:
         raise HTTPException(status_code=400, detail="Scan a folder first.")
 
     folder = payload.folder_path if payload else last_scan["folder"]
 
+    if dry_run:
+        moves = organizer.organize(folder, [])
+        return {"message": "Dry run complete", "moved": 0, "history": moves, "dry_run": True}
+
     moves = organizer.organize(folder, last_scan["files"])
 
     if moves:
+        backup_file = history_file.with_name("history.backup.json")
+        backup_file.write_text(json.dumps(moves, indent=2), encoding="utf-8")
         history_file.write_text(
             json.dumps(moves, indent=2),
             encoding="utf-8"
@@ -77,9 +83,9 @@ def undo_organize() -> Dict:
     if not history_file.exists():
         raise HTTPException(status_code=404, detail="No history file found")
     moves = json.loads(history_file.read_text(encoding="utf-8"))
-    restored = organizer.undo(moves)
+    result = organizer.undo(moves)
     history_file.write_text("[]", encoding="utf-8")
-    return {"message": "Undo completed", "restored": restored}
+    return {"message": "Undo completed", "restored": result["restored"], "failed": result["failed"]}
 
 
 @app.get("/stats")

@@ -5,8 +5,8 @@ const api = axios.create({
   timeout: 30000,
 });
 
-export const scanFolder = (folderPath) => api.post('/scan-folder', { folder_path: folderPath });
-export const organizeFiles = (folderPath) => api.post('/organize', { folder_path: folderPath });
+export const scanFolder = (folderPath, aiAssisted = false) => api.post('/scan-folder', { folder_path: folderPath, ai_assisted: aiAssisted });
+export const organizeFiles = (folderPath, dryRun = false) => api.post(`/organize${dryRun ? '?dry_run=true' : ''}`, { folder_path: folderPath });
 export const undoOrganize = () => api.post('/undo');
 
 // Backend currently returns these in /scan-folder payload, but helpers are provided

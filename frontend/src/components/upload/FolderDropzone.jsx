@@ -4,16 +4,15 @@ import { FolderUp } from 'lucide-react';
 
 export default function FolderDropzone({ folder, setFolder }) {
   const [hover, setHover] = useState(false);
+  const [selectedCount, setSelectedCount] = useState(0);
 
-  const pickFolder = async () => {
-    if (window.showDirectoryPicker) {
-      try {
-        const handle = await window.showDirectoryPicker();
-        if (handle?.name) setFolder(handle.name);
-      } catch {
-        // silent cancel
-      }
-    }
+  const onFolderFilesSelected = (event) => {
+    const files = Array.from(event.target.files || []);
+    setSelectedCount(files.length);
+    if (!files.length) return;
+    const firstPath = files[0].webkitRelativePath || '';
+    const root = firstPath.split('/')[0] || '';
+    if (root) setFolder(root);
   };
 
   return (
@@ -38,8 +37,12 @@ export default function FolderDropzone({ folder, setFolder }) {
             <p className="text-xs text-slate-400">Drop from your file manager, or browse manually.</p>
           </div>
         </div>
-        <button onClick={pickFolder} className="btn">Browse Folder</button>
+        <label className="btn cursor-pointer">
+          Select Folder
+          <input type="file" webkitdirectory="true" multiple className="hidden" onChange={onFolderFilesSelected} />
+        </label>
       </div>
+      {selectedCount > 0 ? <p className="relative mt-2 text-xs text-cyan-300">Selected files: {selectedCount}</p> : null}
       <input value={folder} onChange={(e) => setFolder(e.target.value)} placeholder="Absolute folder path fallback..." className="relative mt-4 w-full rounded-xl border border-white/15 bg-slate-950/70 px-4 py-2 text-sm text-white outline-none ring-cyan-300 transition focus:ring-2" />
     </motion.div>
   );
