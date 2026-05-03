@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 from typing import Any, Dict, List, Tuple
 from pathlib import Path
+import os
 
 from app.utils.hashing import file_hash
 
@@ -69,4 +70,7 @@ def heuristic_suggestions(files: List[Dict[str, Any]]) -> Tuple[List[Dict[str, A
 
 
 def generate_ai_suggestions(files: List[Dict[str, Any]], heuristics: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    if os.getenv("OPENAI_API_KEY"):
+        # Placeholder for optional OpenAI integration; fallback kept reliable.
+        return heuristics
     return heuristics

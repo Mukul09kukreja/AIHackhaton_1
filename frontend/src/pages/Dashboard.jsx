@@ -22,6 +22,8 @@ export default function Dashboard() {
   const [folder, setFolder] = useState('');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState('');
+  const [aiAssisted, setAiAssisted] = useState(false);
   const [query, setQuery] = useState('');
   const [extension, setExtension] = useState('');
   const [category, setCategory] = useState('');
@@ -38,7 +40,7 @@ export default function Dashboard() {
     if (!folder) return toast.error('Please enter a folder path');
     setLoading(true);
     try {
-      const res = await scanFolder(folder);
+      const res = await scanFolder(folder, aiAssisted);
       setData(res.data);
       const dupCount = res.data?.insights?.duplicate_count || 0;
       logActivity('scan', `Scanned ${res.data?.stats?.total_files || 0} files in ${folder}`);
@@ -52,10 +54,18 @@ export default function Dashboard() {
   };
 
   const onOrganize = async () => {
-    try { await organizeFiles(folder); logActivity('organize', `Organized files in ${folder}`); toast.success('Files organized'); await refreshScan(); } catch { toast.error('Organize failed'); }
+    setActionLoading('organize');
+    try { await organizeFiles(folder); logActivity('organize', `Organized files in ${folder}`); toast.success('Organized'); await refreshScan(); } catch { toast.error('Organize failed'); } finally { setActionLoading(''); }
   };
   const onUndo = async () => {
-    try { await undoOrganize(); logActivity('undo', `Undo operation executed for ${folder}`); toast.success('Undo complete'); await refreshScan(); } catch { toast.error('Undo failed'); }
+    setActionLoading('undo');
+    try {
+      await undoOrganize();
+      setData(null);
+      logActivity('undo', `Undo operation executed for ${folder}`);
+      toast.success('Undo completed');
+      await refreshScan();
+    } catch { toast.error('Undo failed'); } finally { setActionLoading(''); }
   };
 
   const onExport = (kind) => {
@@ -82,9 +92,13 @@ export default function Dashboard() {
         <p className="mt-1 text-slate-400">Futuristic local file intelligence with analytics, cleanup insights, and reversible actions.</p>
         <div className="mt-4"><FolderDropzone folder={folder} setFolder={setFolder} /></div>
         <div className="mt-4 flex flex-wrap gap-3">
-          <button onClick={refreshScan} className="btn"><FolderOpen size={16} /> Scan</button>
-          <button onClick={onOrganize} className="btn"><WandSparkles size={16} /> Organize</button>
-          <button onClick={onUndo} className="btn"><RotateCcw size={16} /> Undo</button>
+          <button onClick={refreshScan} disabled={loading || actionLoading} className="btn"><FolderOpen size={16} /> {loading ? 'Scanning...' : 'Scan'}</button>
+          <button onClick={onOrganize} disabled={loading || actionLoading} className="btn"><WandSparkles size={16} /> {actionLoading === 'organize' ? 'Organizing...' : 'Organize'}</button>
+          <button onClick={onUndo} disabled={loading || actionLoading} className="btn"><RotateCcw size={16} /> {actionLoading === 'undo' ? 'Undoing...' : 'Undo'}</button>
+          <label className="ml-2 inline-flex items-center gap-2 text-sm text-slate-200">
+            <input type="checkbox" checked={aiAssisted} onChange={(e) => setAiAssisted(e.target.checked)} />
+            AI Assisted {aiAssisted ? 'ON' : 'OFF'}
+          </label>
         </div>
       </section>
 
