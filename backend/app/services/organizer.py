@@ -7,7 +7,9 @@ from collections import Counter, defaultdict
 from typing import Dict, List, Tuple
 import shutil
 
-from utils import categorize_extension, file_hash, datetime_to_iso, human_size, build_tree
+from app.utils.file_helpers import categorize_extension, datetime_to_iso, human_size
+from app.utils.hashing import file_hash
+from app.utils.tree_builder import build_tree
 
 
 class FolderOrganizer:
