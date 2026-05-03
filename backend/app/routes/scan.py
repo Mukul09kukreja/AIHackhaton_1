@@ -18,5 +18,6 @@ def scan(payload: FolderRequest):
     suggestions, insights = heuristic_suggestions(data["files"])
     data["ai_suggestions"] = generate_ai_suggestions(data["files"], suggestions)
     data["insights"] = insights
+    data["workspace_insights"] = {"mode": "local", "summary": "Using local AI insights", "workspace_health_score": 0, "suggestions": [], "cleanup_recommendations": [], "risks": [], "category_insights": []}
     last_scan.clear(); last_scan.update(data)
     return data
