@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
-import { AlertTriangle, Box, Broom, Info } from 'lucide-react';
+import { AlertTriangle, Box, Brush, Info } from 'lucide-react';
 
 const iconFor = (title = '') => {
   const t = title.toLowerCase();
   if (t.includes('duplicate')) return AlertTriangle;
   if (t.includes('large')) return Box;
-  if (t.includes('screenshot')) return Broom;
+  if (t.includes('screenshot')) return Brush;
   return Info;
 };
 
