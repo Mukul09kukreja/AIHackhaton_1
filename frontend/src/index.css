@@ -1,3 +1,12 @@
-@tailwind base;@tailwind components;@tailwind utilities;
-body{font-family:Inter,system-ui,sans-serif}
-.glass{background:rgba(30,41,59,.45);backdrop-filter:blur(10px);border:1px solid rgba(148,163,184,.2)}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Inter, system-ui, sans-serif;
+  background: #020617;
+}
+
+.btn {
+  @apply inline-flex items-center gap-2 rounded-lg border border-cyan-300/20 bg-cyan-400/20 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-400/30;
+}

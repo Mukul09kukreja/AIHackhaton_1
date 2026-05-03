@@ -1,1 +1,28 @@
-export default function FileTable({files=[]}){if(!files.length)return <div className='glass p-8 rounded-xl text-slate-300'>No files scanned yet.</div>;return <div className='glass rounded-xl p-4 overflow-auto'><table className='w-full text-sm'><thead><tr className='text-left text-slate-400'><th>Name</th><th>Category</th><th>Size</th><th>Modified</th></tr></thead><tbody>{files.slice(0,100).map(f=><tr key={f.file_path} className='border-t border-slate-700 text-slate-200'><td>{f.filename}</td><td>{f.category}</td><td>{f.size_human}</td><td>{new Date(f.modified_date).toLocaleDateString()}</td></tr>)}</tbody></table></div>}
+export default function FileTable({ files = [] }) {
+  return (
+    <div className="overflow-auto rounded-2xl border border-white/10 bg-white/5">
+      <table className="w-full text-sm">
+        <thead className="bg-white/5 text-left text-slate-300">
+          <tr>
+            <th className="px-4 py-3">Name</th>
+            <th className="px-4 py-3">Category</th>
+            <th className="px-4 py-3">Size</th>
+            <th className="px-4 py-3">Modified</th>
+            <th className="px-4 py-3">Extension</th>
+          </tr>
+        </thead>
+        <tbody>
+          {files.map((file) => (
+            <tr key={file.file_path} className="border-t border-white/10 text-slate-200 hover:bg-white/5">
+              <td className="px-4 py-3">{file.filename}</td>
+              <td className="px-4 py-3">{file.category}</td>
+              <td className="px-4 py-3">{file.size_human}</td>
+              <td className="px-4 py-3">{new Date(file.modified_date).toLocaleDateString()}</td>
+              <td className="px-4 py-3">{file.extension || '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
