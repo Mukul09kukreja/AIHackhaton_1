@@ -10,8 +10,13 @@ export default function FolderDropzone({ folder, setFolder }) {
     const files = Array.from(event.target.files || []);
     setSelectedCount(files.length);
     if (!files.length) return;
-    const firstPath = files[0].webkitRelativePath || '';
+    const sample = files[0];
+    const firstPath = sample.webkitRelativePath || '';
     const root = firstPath.split('/')[0] || '';
+    if (sample.path) {
+      setFolder(sample.path.replace(/[/\\][^/\\]+$/, ''));
+      return;
+    }
     if (root) setFolder(root);
   };
 
@@ -39,10 +44,11 @@ export default function FolderDropzone({ folder, setFolder }) {
         </div>
         <label className="btn cursor-pointer">
           Select Folder
-          <input type="file" webkitdirectory="true" multiple className="hidden" onChange={onFolderFilesSelected} />
+          <input type="file" webkitdirectory="" directory="" multiple className="hidden" onChange={onFolderFilesSelected} />
         </label>
       </div>
       {selectedCount > 0 ? <p className="relative mt-2 text-xs text-cyan-300">Selected files: {selectedCount}</p> : null}
+      <p className="relative mt-1 text-xs text-slate-400">Tip: Browser may not expose absolute paths. Paste full path manually if needed.</p>
       <input value={folder} onChange={(e) => setFolder(e.target.value)} placeholder="Absolute folder path fallback..." className="relative mt-4 w-full rounded-xl border border-white/15 bg-slate-950/70 px-4 py-2 text-sm text-white outline-none ring-cyan-300 transition focus:ring-2" />
     </motion.div>
   );

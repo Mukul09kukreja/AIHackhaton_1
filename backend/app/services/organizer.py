@@ -25,7 +25,10 @@ class FolderOrganizer:
         for file_path in root.rglob("*"):
             if not file_path.is_file():
                 continue
-            stat = file_path.stat()
+            try:
+                stat = file_path.stat()
+            except OSError:
+                continue
             category = categorize_extension(file_path.suffix)
             file_paths.append(file_path)
             files.append(
@@ -86,6 +89,10 @@ class FolderOrganizer:
         if not suggestions:
             suggestions.append({"type": "clean", "title": "Folder health looks good", "detail": "No critical clutter patterns detected."})
 
+        duplicate_paths = {p for group in duplicates for p in group}
+        for f in files:
+            f["is_duplicate"] = f["file_path"] in duplicate_paths
+
         extra = {
             "duplicate_count": sum(len(g) for g in duplicates),
             "duplicates": duplicates,
@@ -127,12 +134,16 @@ class FolderOrganizer:
 
     def undo(self, moves: List[Dict]) -> Dict:
         restored = 0
+        skipped: List[Dict] = []
         failed: List[Dict] = []
         for move in reversed(moves):
             src = Path(move.get("dest") or move.get("to", ""))
             dst = Path(move.get("src") or move.get("from", ""))
+            if not src or not dst:
+                skipped.append({"move": move, "reason": "invalid_move_entry"})
+                continue
             if not src.exists():
-                failed.append({"src": str(src), "dest": str(dst), "reason": "source_missing"})
+                skipped.append({"src": str(src), "dest": str(dst), "reason": "source_missing"})
                 continue
             try:
                 dst.parent.mkdir(parents=True, exist_ok=True)
@@ -145,4 +156,4 @@ class FolderOrganizer:
                 restored += 1
             except Exception as exc:
                 failed.append({"src": str(src), "dest": str(dst), "reason": str(exc)})
-        return {"restored": restored, "failed": failed}
+        return {"restored": restored, "skipped": skipped, "failed": failed}

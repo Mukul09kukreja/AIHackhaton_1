@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [duplicateOnly, setDuplicateOnly] = useState(false);
   const [activities, setActivities] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
   const [insights, setInsights] = useState(null);
+  const [scanProgress, setScanProgress] = useState({ active: 0, percent: 0, stage: 'Idle', running: false });
 
   const logActivity = (type, summary) => {
     const next = [{ type, summary, timestamp: new Date().toISOString() }, ...activities].slice(0, 20);
@@ -40,17 +41,22 @@ export default function Dashboard() {
   const refreshScan = async () => {
     if (!folder) return toast.error('Please enter a folder path');
     setLoading(true);
+    setScanProgress({ active: 0, percent: 10, stage: 'Preparing scan', running: true });
     try {
+      setScanProgress({ active: 1, percent: 35, stage: 'Scanning files', running: true });
       const res = await scanFolder(folder, aiAssisted);
       setData(res.data);
+      setScanProgress({ active: 2, percent: 75, stage: 'Generating AI suggestions', running: true });
       const aiRes = await getAISuggestions();
       setInsights(aiRes.data);
       const dupCount = res.data?.insights?.duplicate_count || 0;
       logActivity('scan', `Scanned ${res.data?.stats?.total_files || 0} files in ${folder}`);
       if (dupCount) logActivity('duplicate', `Detected ${dupCount} duplicate files`);
+      setScanProgress({ active: 3, percent: 100, stage: 'Complete', running: false });
       toast.success('Scan complete');
     } catch (e) {
       toast.error(e?.response?.data?.detail || 'Scan failed');
+      setScanProgress({ active: 0, percent: 0, stage: 'Scan failed', running: false });
     } finally {
       setLoading(false);
     }
@@ -63,10 +69,13 @@ export default function Dashboard() {
   const onUndo = async () => {
     setActionLoading('undo');
     try {
-      await undoOrganize();
+      const undoRes = await undoOrganize();
       setData(null);
+      setInsights(null);
       logActivity('undo', `Undo operation executed for ${folder}`);
-      toast.success('Undo completed');
+      const restored = undoRes?.data?.restored ?? 0;
+      const skipped = undoRes?.data?.skipped?.length ?? 0;
+      toast.success(`Undo completed. Restored: ${restored}${skipped ? `, Skipped: ${skipped}` : ''}`);
       await refreshScan();
     } catch { toast.error('Undo failed'); } finally { setActionLoading(''); }
   };
@@ -120,8 +129,8 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <ProgressTimeline active={data ? 3 : 0} />
-      {loading ? <Loader label="Scanning folder and preparing AI insights..." progress={75} filesScanned={data?.stats?.total_files || 0} elapsed="~2s" stage="Analyzing metadata" /> : null}
+      <ProgressTimeline active={scanProgress.active} />
+      {loading || scanProgress.running ? <Loader label="Scanning folder and preparing AI insights..." progress={scanProgress.percent} filesScanned={data?.stats?.total_files || 0} elapsed="~2s" stage={scanProgress.stage} /> : null}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatsCard label="Total Files" value={data?.stats?.total_files ?? '-'} icon={Files} />
