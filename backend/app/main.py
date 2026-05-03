@@ -54,10 +54,22 @@ def scan_folder(payload: FolderRequest) -> Dict:
 def organize_files(payload: Optional[FolderRequest] = None) -> Dict:
     if not last_scan:
         raise HTTPException(status_code=400, detail="Scan a folder first.")
+
     folder = payload.folder_path if payload else last_scan["folder"]
+
     moves = organizer.organize(folder, last_scan["files"])
-    history_file.write_text(json.dumps(moves, indent=2), encoding="utf-8")
-    return {"message": "Files organized successfully", "moved": len(moves), "history": moves}
+
+    if moves:
+        history_file.write_text(
+            json.dumps(moves, indent=2),
+            encoding="utf-8"
+        )
+
+    return {
+        "message": "Files organized successfully",
+        "moved": len(moves),
+        "history": moves
+    }
 
 
 @app.post("/undo")
