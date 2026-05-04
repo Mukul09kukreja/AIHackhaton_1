@@ -1,13 +1,24 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FolderUp } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function FolderDropzone({ folder, setFolder }) {
   const [hover, setHover] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
 
+  const allowed = ['txt', 'pdf', 'png', 'jpg', 'jpeg'];
+
   const onFolderFilesSelected = (event) => {
     const files = Array.from(event.target.files || []);
+    const unsupported = files.find((f) => {
+      const ext = f.name.split('.').pop()?.toLowerCase();
+      return ext && !allowed.includes(ext);
+    });
+    if (unsupported) {
+      toast.error('Unsupported file type');
+      return;
+    }
     setSelectedCount(files.length);
     if (!files.length) return;
     const sample = files[0];

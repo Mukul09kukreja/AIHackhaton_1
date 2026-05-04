@@ -1,3 +1,12 @@
 """In-memory app state for last scan result."""
+from threading import Lock
 from typing import Any, Dict
-last_scan: Dict[str, Any] = {}
+
+
+class AppState:
+    def __init__(self) -> None:
+        self.lock = Lock()
+        self.last_scan: Dict[str, Any] = {}
+
+
+state = AppState()
