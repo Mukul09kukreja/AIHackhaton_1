@@ -4,20 +4,37 @@ from typing import Any, Dict, List
 import shutil
 
 
-def organize_files(folder: str, files: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def get_safe_filename(destination: Path) -> Path:
+    if not destination.exists():
+        return destination
+
+    counter = 1
+    while True:
+        candidate = destination.with_stem(f'{destination.stem}({counter})')
+        if not candidate.exists():
+            return candidate
+        counter += 1
+
+
+def organize_files(folder: str, files: List[Dict[str, Any]], dry_run: bool = False) -> List[Dict[str, Any]]:
     root = Path(folder)
     moves = []
     for item in files:
-        source = Path(item["file_path"])
+        source = Path(item['file_path'])
         if not source.exists():
             continue
-        target_dir = root / item["category"]
+        target_dir = root / item['category']
         target_dir.mkdir(parents=True, exist_ok=True)
-        target = target_dir / source.name
-        i = 1
-        while target.exists():
-            target = target_dir / f"{source.stem}_{i}{source.suffix}"
-            i += 1
-        shutil.move(str(source), str(target))
-        moves.append({"from": str(source), "to": str(target), "moved_at": datetime.now(timezone.utc).isoformat()})
+        target = get_safe_filename(target_dir / source.name)
+        move_record = {'from': str(source), 'to': str(target), 'moved_at': datetime.now(timezone.utc).isoformat()}
+        if dry_run:
+            moves.append(move_record)
+            continue
+        try:
+            shutil.move(str(source), str(target))
+            moves.append(move_record)
+        except PermissionError:
+            continue
+        except Exception:
+            continue
     return moves

@@ -51,14 +51,14 @@ export default function AnalyticsCharts({ stats = {}, insights = {} }) {
 
   return (
     <section className="grid gap-4 lg:grid-cols-3">
-      <ChartCard title="File Category Distribution" subtitle="How your files are split by type" data={categories} index={0} />
-      <ChartCard
+      {categories.length > 0 ? <ChartCard title="File Category Distribution" subtitle="How your files are split by type" data={categories} index={0} /> : <p className="rounded-2xl border border-white/15 bg-white/5 p-4 text-slate-300">No data available</p>}
+      {sizeData.length > 0 ? <ChartCard
         title="Storage Usage Distribution"
         subtitle="Largest files taking disk space"
         data={sizeData}
         index={1}
         valueFormatter={(v) => `${(v / (1024 * 1024)).toFixed(1)} MB`}
-      />
+      /> : <p className="rounded-2xl border border-white/15 bg-white/5 p-4 text-slate-300">No data available</p>}
       <ChartCard title="Clutter Score" subtitle={`Overall storage health · Total ${stats.total_size_human || totalSize}`} data={clutterData} index={2} />
     </section>
   );
