@@ -20,6 +20,5 @@ def validate_folder(path: str) -> Path:
         except ValueError as exc:
             if str(exc) == 'Protected directory':
                 raise
-            continue
 
     return root

@@ -10,13 +10,13 @@ def get_safe_filename(destination: Path) -> Path:
 
     counter = 1
     while True:
-        candidate = destination.with_stem(f"{destination.stem}({counter})")
+        candidate = destination.with_stem(f'{destination.stem}({counter})')
         if not candidate.exists():
             return candidate
         counter += 1
 
 
-def organize_files(folder: str, files: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def organize_files(folder: str, files: List[Dict[str, Any]], dry_run: bool = False) -> List[Dict[str, Any]]:
     root = Path(folder)
     moves = []
     for item in files:
@@ -26,9 +26,13 @@ def organize_files(folder: str, files: List[Dict[str, Any]]) -> List[Dict[str, A
         target_dir = root / item['category']
         target_dir.mkdir(parents=True, exist_ok=True)
         target = get_safe_filename(target_dir / source.name)
+        move_record = {'from': str(source), 'to': str(target), 'moved_at': datetime.now(timezone.utc).isoformat()}
+        if dry_run:
+            moves.append(move_record)
+            continue
         try:
             shutil.move(str(source), str(target))
-            moves.append({'from': str(source), 'to': str(target), 'moved_at': datetime.now(timezone.utc).isoformat()})
+            moves.append(move_record)
         except PermissionError:
             continue
         except Exception:

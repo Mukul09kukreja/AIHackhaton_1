@@ -7,13 +7,18 @@ HISTORY_PATH = Path(__file__).resolve().parent.parent / 'data' / 'history.json'
 
 
 def write_history(moves: List[Dict]) -> None:
+    HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
     HISTORY_PATH.write_text(json.dumps(moves, indent=2), encoding='utf-8')
 
 
 def read_history() -> List[Dict]:
     if not HISTORY_PATH.exists():
         return []
-    return json.loads(HISTORY_PATH.read_text(encoding='utf-8'))
+    try:
+        payload = json.loads(HISTORY_PATH.read_text(encoding='utf-8'))
+        return payload if isinstance(payload, list) else []
+    except (json.JSONDecodeError, OSError):
+        return []
 
 
 def undo_moves(moves: List[Dict]) -> Tuple[int, List[Dict], List[Dict]]:
