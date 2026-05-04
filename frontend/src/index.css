@@ -7,6 +7,13 @@ body {
   background: #020617;
 }
 
+.aether-bg {
+  background:
+    radial-gradient(circle at 50% 8%, rgba(0, 210, 220, 0.24), transparent 35%),
+    radial-gradient(circle at 70% 40%, rgba(0, 180, 160, 0.16), transparent 30%),
+    linear-gradient(180deg, #04060d 0%, #02040a 100%);
+}
+
 .btn {
-  @apply inline-flex items-center gap-2 rounded-lg border border-cyan-300/20 bg-cyan-400/20 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-400/30;
+  @apply inline-flex items-center gap-2 rounded-none border border-cyan-100/40 bg-white/5 px-6 py-3 text-sm font-medium tracking-wider text-slate-100 transition hover:bg-cyan-300/20;
 }

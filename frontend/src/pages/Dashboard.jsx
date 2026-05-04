@@ -98,15 +98,16 @@ export default function Dashboard() {
   }), [data, query, extension, category, duplicateOnly]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-2xl">
-        <h2 className="text-3xl font-semibold text-white">Premium Smart File Command Center</h2>
-        <p className="mt-1 text-slate-400">Futuristic local file intelligence with analytics, cleanup insights, and reversible actions.</p>
+    <div className="mx-auto max-w-7xl space-y-6 px-4 pb-12 pt-10 md:px-6">
+      <section className="relative overflow-hidden rounded-[36px] border border-cyan-200/15 bg-black/35 p-6 backdrop-blur-2xl">
+        <div className="pointer-events-none absolute -top-32 left-1/3 h-80 w-80 rounded-full bg-cyan-500/25 blur-[120px]" />
+        <h2 className="text-4xl font-semibold tracking-wide text-white">Organize the Infinite.</h2>
+        <p className="mt-2 max-w-3xl text-slate-300">AI intelligence for your digital clutter. Scan, detect duplicates, and restructure with one command center.</p>
         <div className="mt-4"><FolderDropzone folder={folder} setFolder={setFolder} /></div>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button onClick={refreshScan} disabled={loading || actionLoading} className="btn"><FolderOpen size={16} /> {loading ? 'Scanning...' : 'Scan'}</button>
-          <button onClick={onOrganize} disabled={loading || actionLoading} className="btn"><WandSparkles size={16} /> {actionLoading === 'organize' ? 'Organizing...' : 'Organize'}</button>
-          <button onClick={onUndo} disabled={loading || actionLoading} className="btn"><RotateCcw size={16} /> {actionLoading === 'undo' ? 'Undoing...' : 'Undo'}</button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button onClick={refreshScan} disabled={loading || actionLoading} className="btn"><FolderOpen size={16} /> {loading ? 'Scanning...' : 'SCAN SYSTEM'}</button>
+          <button onClick={onOrganize} disabled={loading || actionLoading} className="btn"><WandSparkles size={16} /> {actionLoading === 'organize' ? 'Organizing...' : 'ORGANIZE'}</button>
+          <button onClick={onUndo} disabled={loading || actionLoading} className="btn"><RotateCcw size={16} /> {actionLoading === 'undo' ? 'Undoing...' : 'UNDO'}</button>
           <label className="ml-2 inline-flex items-center gap-2 text-sm text-slate-200">
             <input type="checkbox" checked={aiAssisted} onChange={(e) => setAiAssisted(e.target.checked)} />
             AI Assisted Insights {aiAssisted ? 'ON' : 'OFF'}

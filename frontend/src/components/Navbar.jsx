@@ -1,18 +1,20 @@
-import { Sparkles, FolderTree } from 'lucide-react';
+import { Bell, Settings } from 'lucide-react';
+
+const navItems = ['FILES', 'INSIGHTS', 'AUTOMATIONS', 'VAULT'];
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-20 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-cyan-400/20 p-2 text-cyan-300"><FolderTree size={18} /></div>
-          <div>
-            <p className="text-sm text-slate-400">Smart File Organizer</p>
-            <h1 className="font-semibold text-white">AI Suggestions Dashboard</h1>
-          </div>
-        </div>
-        <div className="hidden items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-200 md:flex">
-          <Sparkles size={14} /> AI Assisted
+    <header className="relative z-20 px-4 pt-6">
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between rounded-3xl border border-cyan-200/15 bg-black/55 px-6 py-4 shadow-[0_0_40px_rgba(8,145,178,0.15)] backdrop-blur-xl">
+        <h1 className="text-3xl font-semibold tracking-[0.2em] text-white">AETHERFILE</h1>
+        <nav className="hidden items-center gap-8 md:flex">
+          {navItems.map((item, i) => (
+            <button key={item} className={`text-sm tracking-wider ${i === 0 ? 'text-white underline underline-offset-8' : 'text-white/50'}`}>{item}</button>
+          ))}
+        </nav>
+        <div className="flex items-center gap-4 text-white/80">
+          <Bell size={18} />
+          <Settings size={18} />
         </div>
       </div>
     </header>
